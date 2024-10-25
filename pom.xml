@@ -29,11 +29,25 @@
 	</dependency>
 	
 	<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
-<dependency>
-    <groupId>org.apache.logging.log4j</groupId>
-    <artifactId>log4j-api</artifactId>
-    <version>2.24.1</version>
-</dependency>
+	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>2.24.1</version>
+	</dependency>
+
+	<!-- UCanAccess -->
+    <dependency>
+        <groupId>net.sf.ucanaccess</groupId>
+        <artifactId>ucanaccess</artifactId>
+        <version>5.0.1</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/com.healthmarketscience.jackcess/jackcess-encrypt -->
+	<dependency>
+    	<groupId>com.healthmarketscience.jackcess</groupId>
+    	<artifactId>jackcess-encrypt</artifactId>
+    	<version>4.0.2</version>
+	</dependency>
 
 	
   </dependencies>

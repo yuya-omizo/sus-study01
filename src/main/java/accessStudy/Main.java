@@ -24,7 +24,6 @@ public class Main {
 		}
 		
 		//とりあえず表示
-		DBManager info = new DBManager();
-		info.printInfo();
+		DBManager.getConnProductDB();
 	}
 }

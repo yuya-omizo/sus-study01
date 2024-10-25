@@ -1,27 +1,38 @@
 package accessStudy;
 
-import java.util.ResourceBundle;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DBManager {
-	private String dbUrl;
-    private String username;
-    private String password;
+	private static String productMaster;
     
-    public DBManager() {
-    	 loadProperties();
-    }
+	//データベース接続用クラス
+	public static void getConnProductDB() {
+		//ResourceBundle rb = ResourceBundle.getBundle("info");
+	   	//productMaster = rb.getString("db.productMaster");
+	   	
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:ucanaccess:///Applications/Eclipse_2023-12.app/Contents/workspace/accessStudy/data/OldVerDB.mdb");
+			Statement st = conn.createStatement();
+			ResultSet rs = st.executeQuery("SELECT * FROM 商品マスタ");
 
-	private void loadProperties() {
-		ResourceBundle rb = ResourceBundle.getBundle("info");
-		dbUrl = rb.getString("db.url");
-        username = rb.getString("db.username");
-        password = rb.getString("db.password");
+			while (rs.next()) {
+				System.out.println(rs.getString("商品ID"));
+			}
+			rs.close();
+			st.close();
+			conn.close();
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
 	}
+		
 	
 	public void printInfo() {
-		System.out.println(dbUrl);
-		System.out.println(username);
-		System.out.println(password);
+		System.out.println(productMaster);
 	}
 	
 	public void insertSalesData() {
@@ -31,4 +42,5 @@ public class DBManager {
 	public void insertItemData() {
 		
 	}
+
 }
