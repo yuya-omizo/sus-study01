@@ -23,7 +23,7 @@ public class Main {
 			logger.error("CSV Error: " + e);
 		}
 		
-		//とりあえず表示してみる
+		//とりあえず表示
 		DBManager info = new DBManager();
 		info.printInfo();
 	}
