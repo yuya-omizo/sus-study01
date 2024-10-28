@@ -42,23 +42,13 @@
     	<version>2.24.1</version>
 	</dependency>
 
-	<!-- UCanAccess -->
+	<!-- UCanAccess  latest 5.0.1 -->
     <dependency>
     	<groupId>net.sf.ucanaccess</groupId>
     	<artifactId>ucanaccess</artifactId>
-    	<version>4.0.4</version>  <!-- 最新は5.0.1 -->
+    	<version>4.0.4</version>
 	</dependency>
-    
-    
-    <!-- https://mvnrepository.com/artifact/com.healthmarketscience.jackcess/jackcess-encrypt latest 4.0.2
-	<dependency>
-    	<groupId>com.healthmarketscience.jackcess</groupId>
-    	<artifactId>jackcess-encrypt</artifactId>
-    	<version>2.0.2</version>	 
-	</dependency>
-	 -->
 
-	
 	<!-- Jackcess -->
 	<dependency>
     	<groupId>com.healthmarketscience.jackcess</groupId>
@@ -66,22 +56,20 @@
     	<version>2.1.11</version>
 	</dependency>
 
-<!-- Jackcess Encrypt -->
+	<!-- Jackcess Encrypt latest 4.0.2　-->
 	<dependency>
     	<groupId>com.healthmarketscience.jackcess</groupId>
     	<artifactId>jackcess-encrypt</artifactId>
     	<version>2.1.4</version>
 	</dependency>
 	
-	<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
+	<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb  latest 2.7.3 -->
 	<dependency>
     	<groupId>org.hsqldb</groupId>
     	<artifactId>hsqldb</artifactId>
-    	<version>2.5.1</version>	<!-- 最新は2.7.3 -->
+    	<version>2.5.1</version>
     	<!-- <scope>test</scope> -->
-</dependency>
-
-
+	</dependency>
 	
   </dependencies>
 

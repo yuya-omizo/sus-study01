@@ -23,7 +23,6 @@ public class DBManager {
 			Connection conn = DriverManager.getConnection(url, user, dbPassword);
 			Statement st = conn.createStatement();
 			ResultSet rs = st.executeQuery("SELECT * FROM 商品マスタ")){
-
 			while (rs.next()) {
 				System.out.println(rs.getString("商品ID"));
 			}
