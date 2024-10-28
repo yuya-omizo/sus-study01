@@ -24,6 +24,6 @@ public class Main {
 		}
 		
 		//とりあえず表示
-		DBManager.getConnProductDB();
+		DBManager.connectToDB();
 	}
 }
