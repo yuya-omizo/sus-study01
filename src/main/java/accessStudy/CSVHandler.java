@@ -21,8 +21,9 @@ public class CSVHandler {
 		File file = new File(path);
 		try (CSVReader csvReader = new CSVReader(new FileReader(file))) {
 			String[] line;
+			csvReader.readNext(); // 先頭行を無視
 			while((line = csvReader.readNext()) !=null) {
-				csvData.add(line); //1行ずつリストに格納
+					csvData.add(line); //1行ずつリストに格納
 			}
 			return csvData;
 		} catch (IOException e) {
