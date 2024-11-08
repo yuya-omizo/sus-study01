@@ -1,5 +1,6 @@
 package accessStudy;
 
+//入荷リストのカスタムクラス
 public class StockArrivalData {
 	private int productId;
 	private int quantity;
