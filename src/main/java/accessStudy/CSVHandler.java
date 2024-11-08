@@ -29,6 +29,6 @@ public class CSVHandler {
 		} catch (IOException e) {
 			logger.error("File Error: " + e);
 		}
-		return null;
+		return csvData;
 	}
 }
