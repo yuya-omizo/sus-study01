@@ -29,6 +29,6 @@ public class CSVHandler {
 		} catch (IOException e) {
 			logger.error("File Error: " + e);
 		}
-		return csvData;
+		return csvData; // 空のリスト
 	}
 }
