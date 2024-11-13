@@ -19,16 +19,18 @@ import org.apache.logging.log4j.Logger;
 import com.opencsv.exceptions.CsvException;
 
 public class DBManager {
+
 	private static final Logger logger = LogManager.getLogger(Main.class);
-	
+	private static String date;
+
 	//データベース出力
 	public static void printDB() {
 		try (
 				Connection conn = DBConnection.getConnection();
 				Statement st = conn.createStatement();
-				ResultSet rs = st.executeQuery("SELECT * FROM 商品マスタ")) {
+				ResultSet rs = st.executeQuery("SELECT * FROM 入荷")) {
 			while (rs.next()) {
-				System.out.println(rs.getInt("在庫数"));
+				System.out.println(rs.getTimestamp("日時"));
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -56,12 +58,12 @@ public class DBManager {
 		logger.info("売上データCSVを読み込みます");
 		Calendar cl = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String date = sdf.format(cl.getTime());
+		date = sdf.format(cl.getTime());
 
-		CSVHandler csvData = new CSVHandler();
+		CSVHandler dataList = new CSVHandler();
 		List<String[]> csvList = new ArrayList<>();
 		try {
-			csvList = csvData.readCSV(csvPath);
+			csvList = dataList.readCSV(csvPath);
 			//csvList.forEach(arr -> System.out.println(Arrays.toString(arr)));
 		} catch (CsvException e) {
 			e.printStackTrace();
@@ -122,21 +124,17 @@ public class DBManager {
 			logger.error("データベース接続エラー", e);
 			throw new RuntimeException("データベース操作に失敗しました", e);
 		}
-
-		logger.info("売上データ処理完了しました");
+		// logger.info("売上データ処理完了しました");
 	}
 
-	//入荷データDB格納
+	// 入荷データDB格納
 	public static void insertStockArrivalReport(String csvPath) throws SQLException {
 		logger.info("入荷データCSVを読み込みます");
-		Calendar cl = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String date = sdf.format(cl.getTime());
 
-		CSVHandler csvData = new CSVHandler();
+		CSVHandler dataList = new CSVHandler();
 		List<String[]> csvList = new ArrayList<>();
 		try {
-			csvList = csvData.readCSV(csvPath);
+			csvList = dataList.readCSV(csvPath);
 			//csvList.forEach(arr -> System.out.println(Arrays.toString(arr)));
 		} catch (CsvException e) {
 			e.printStackTrace();
@@ -197,8 +195,7 @@ public class DBManager {
 			logger.error("データベース接続エラー", e);
 			throw new RuntimeException("データベース操作に失敗しました", e);
 		}
-
-		logger.info("入荷データ処理完了しました");
+		// logger.info("入荷データ処理完了しました");
 	}
 
 	public static int searchProductId(String param) {
@@ -217,7 +214,7 @@ public class DBManager {
 				PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, param);
 
-			try (ResultSet rs = pstmt.executeQuery()) { //検索結果が重複している場合は、複数行返すので、whileを使う。今は一意なのでif
+			try (ResultSet rs = pstmt.executeQuery()) { // 検索結果が重複している場合は、複数行返すので、whileを使う。今は一意なのでif
 				if (rs.next()) {
 					String str = rs.getString(columnName);
 					return str;
@@ -232,31 +229,36 @@ public class DBManager {
 		return null;
 	}
 
-	//在庫数反映をバッチ処理
+	// 在庫数反映をバッチ処理
 	public static void updateStocks() throws SQLException {
 		logger.info("商品マスタ：在庫数の更新処理を開始");
-		String sqltStockArrival = "SELECT 商品ID, SUM(入荷数) AS 合計入荷数 FROM 入荷 GROUP BY 商品ID";
+		String sqlStockArrival = "SELECT 商品ID, SUM(入荷数) AS 合計入荷数 FROM 入荷 GROUP BY 商品ID";
 		String sqlSales = "SELECT 商品ID, SUM(CAST(販売個数 AS INTEGER)) AS 合計売上数 FROM 売り上げ GROUP BY 商品ID"; //販売個数の型だけVARCHARなので、キャストしないといけない
 		String sqlUpdateStock = "UPDATE 商品マスタ SET 在庫数 = ? WHERE 商品ID = ?";
+
+		Calendar cl = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(cl.getTime());
 
 		try (Connection conn = DBConnection.getConnection();
 				Statement stmt = conn.createStatement();
 				PreparedStatement pstmtUpdateStock = conn.prepareStatement(sqlUpdateStock)) {
 
-			//トランザクション開始
+			// トランザクション開始
 			conn.setAutoCommit(false);
 
 			try {
 				// 入荷データの集計(商品IDごと)
 				Map<Integer, Integer> stockArrivalMap = new HashMap<>();
-				try (ResultSet rsArrival = stmt.executeQuery(sqltStockArrival)) {
+				try (ResultSet rsArrival = stmt.executeQuery(sqlStockArrival)) {
 					while (rsArrival.next()) {
 						int productId = rsArrival.getInt("商品ID");
 						int totalArrival = rsArrival.getInt("合計入荷数");
 						stockArrivalMap.put(productId, totalArrival);
 					}
-					System.out.println("-----入荷データ集計------");
-					stockArrivalMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 合計数: " + value));
+
+					// System.out.println("-----入荷データ集計------");
+					// stockArrivalMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 合計数: " + value));
 				}
 
 				// 売り上げデータの集計(商品IDごと)
@@ -267,8 +269,9 @@ public class DBManager {
 						int totalSales = rsSales.getInt("合計売上数");
 						salesMap.put(productId, totalSales);
 					}
-					System.out.println("-----売上データ集計------");
-					salesMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 合計数: " + value));
+
+					// System.out.println("-----売上データ集計------");
+					// salesMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 合計数: " + value));
 				}
 
 				// 在庫数アップデート処理
@@ -289,6 +292,7 @@ public class DBManager {
 						pstmtUpdateStock.addBatch();
 					}
 				}
+
 				// バッチ処理を実行
 				pstmtUpdateStock.executeBatch();
 				conn.commit(); // コミット
@@ -301,6 +305,109 @@ public class DBManager {
 				throw new RuntimeException("在庫数の更新に失敗しました", e); //処理を中断
 			}
 		}
+	}
+
+	// 集計CSV出力
+	public static void exportDailyReport() throws SQLException {
+		// データをマップに集計
+		Map<Integer, Integer> dailyStockMap = new HashMap<>();
+		Map<Integer, Integer> dailySalesMap = new HashMap<>();
+		Map<Integer, Integer> dailyStockVariationMap = new HashMap<>(); //在庫変動数マップ
+		String sqlDailyStockArrival = "SELECT 商品ID, 入荷数 FROM 入荷 WHERE 日時 = ?";
+		String sqlDailySales = "SELECT 商品ID, 販売個数 FROM 売り上げ WHERE 日時 = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				Statement stmt = conn.createStatement();
+				PreparedStatement pstmtStock = conn.prepareStatement(sqlDailyStockArrival);
+				PreparedStatement pstmtSales = conn.prepareStatement(sqlDailySales)) {
+
+			pstmtStock.setString(1, date);
+			pstmtSales.setString(1, date);
+
+			// 集計用リスト作成して初期化
+			String selectProduct = "SELECT 商品ID FROM 商品マスタ";
+			try (ResultSet rsProduct = stmt.executeQuery(selectProduct)) {
+				while (rsProduct.next()) {
+					int productId = rsProduct.getInt("商品ID");
+					dailyStockVariationMap.put(productId, 0);
+				}
+			} catch (SQLException e) {
+				logger.error("データベース接続エラー", e);
+				throw new RuntimeException("商品マスタの取得に失敗しました", e); //処理を中断
+			}
+
+			// dailyStockVariationMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 入荷数: " + value));
+
+			// 入荷データの集計(商品IDごと)
+			try (ResultSet rsArrival = pstmtStock.executeQuery()) {
+				while (rsArrival.next()) {
+					int productId = rsArrival.getInt("商品ID");
+					int stockArrival = rsArrival.getInt("入荷数");
+					dailyStockMap.put(productId, stockArrival);
+				}
+
+				// System.out.println("-----" + date + " 入荷データ------");
+				// dailyStockMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 入荷数: " + value));
+
+				// 集計データに合算
+				for (Map.Entry<Integer, Integer> entry : dailyStockMap.entrySet()) {
+					int productId = entry.getKey();
+					int stockArrival = entry.getValue();
+					dailyStockVariationMap.put(productId, dailyStockVariationMap.get(productId) + stockArrival);
+				}
+
+				//System.out.println("-----入荷データ反映------");
+				//dailyStockVariationMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 数: " + value));
+
+			} catch (SQLException e) {
+				logger.error("データベース接続エラー", e);
+				throw new RuntimeException("ランタイムエラー：", e); //処理を中断
+			}
+
+			// 売り上げデータの集計(商品IDごと)
+			try (ResultSet rsSales = pstmtSales.executeQuery()) {
+				while (rsSales.next()) {
+					int productId = rsSales.getInt("商品ID");
+					int totalSales = rsSales.getInt("販売個数");
+					dailySalesMap.put(productId, totalSales);
+				}
+
+				// System.out.println("-----" + date + " 売上データ------");
+				// dailySalesMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 販売個数: " + value));
+
+				for (Map.Entry<Integer, Integer> entry : dailySalesMap.entrySet()) {
+					int productId = entry.getKey();
+					int salesCount = entry.getValue();
+					dailyStockVariationMap.put(productId, dailyStockVariationMap.get(productId) - salesCount);
+				}
+
+				//System.out.println("-----売り上げデータ反映------");
+				//dailyStockVariationMap.forEach((key, value) -> System.out.println("商品ID: " + key + ", 数: " + value));
+
+			} catch (SQLException e) {
+				logger.error("データベース接続エラー", e);
+				throw new RuntimeException("ランタイムエラー：", e); //処理を中断
+			}
+
+		} catch (SQLException e) {
+			logger.error("データベース接続エラー", e);
+			throw new RuntimeException("在庫変動数レポートの取得に失敗しました", e); //処理を中断
+		}
+
+		// 集計マップをリストに変換
+		List<String[]> dataList = new ArrayList<>();
+		dataList.add(new String[] { "商品ID", "在庫変動数"}); // ヘッダーを追加
+		for (Map.Entry<Integer, Integer> entry : dailyStockVariationMap.entrySet()) {
+			String productId =  Integer.toString(entry.getKey());
+			String stockVariation =  Integer.toString(entry.getValue());
+			dataList.add(new String[] { productId, stockVariation });
+		}
+
+		//CSVHandlerに渡す
+		String fileName = date + "_在庫変動レポート" + ".csv";
+		CSVHandler.writeCSV(fileName, dataList);
+
+		logger.info("在庫変動レポートをCSV出力しました");
 	}
 
 }
